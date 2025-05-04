@@ -3,7 +3,6 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from src.database.db import get_db
 from src.schemas import (
     ContactBase,
@@ -13,8 +12,6 @@ from src.schemas import (
 from src.services.contacts import ContactService
 
 router = APIRouter(prefix="/contacts")
-
-
 
 @router.get("/", response_model=List[ContactResponse])
 async def read_contacts(
