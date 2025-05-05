@@ -35,6 +35,20 @@ async def read_contacts(
     return contacts
 
 
+@router.get("/birthdays", response_model=List[ContactResponse])
+async def get_birthdays(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    """Retrieve contacts with upcoming birthdays for the current user.
+
+    Args:
+        db (AsyncSession): Database session dependency.
+        user (User): Currently authenticated user.
+
+    Returns:
+        List[ContactResponse]: A list of contacts with upcoming birthdays.
+    """
+    contact_service = ContactService(db)
+    return await contact_service.get_birthdays(user)
+
 @router.get("/{contact_id}", response_model=ContactResponse)
 async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     """Retrieve a specific contact by its ID.
@@ -124,16 +138,3 @@ async def remove_contact(contact_id: int, db: AsyncSession = Depends(get_db), us
         )
     return contact
 
-@router.get("/birthdays", response_model=List[ContactResponse])
-async def get_birthdays(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
-    """Retrieve contacts with upcoming birthdays for the current user.
-
-    Args:
-        db (AsyncSession): Database session dependency.
-        user (User): Currently authenticated user.
-
-    Returns:
-        List[ContactResponse]: A list of contacts with upcoming birthdays.
-    """
-    contact_service = ContactService(db)
-    return await contact_service.get_birthdays(user)

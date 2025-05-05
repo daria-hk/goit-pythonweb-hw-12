@@ -17,8 +17,7 @@ class ContactBase(BaseModel):
     last_name: str = Field(max_length=50)
     email: EmailStr
     phone: str = Field(max_length=50)
-    birthday: date
-
+    birthday: Optional[date] = None
 
 class ContactUpdate(ContactBase):
     """Model for updating contact information with optional fields.
