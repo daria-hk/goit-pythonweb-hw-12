@@ -2,8 +2,8 @@ from pydantic import ConfigDict, EmailStr
 from pydantic_settings import BaseSettings
 
 class Config(BaseSettings):
-    DB_URL: str
-    JWT_SECRET: str
+    DB_URL: str = "sqlite+aiosqlite:///./test.db"
+    JWT_SECRET: str = "supersecret"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_SECONDS: int = 3600
 

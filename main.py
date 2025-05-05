@@ -22,6 +22,18 @@ class EmailSchema(BaseModel):
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom exception handler for rate limit exceeded errors.
+
+    This handler returns a JSON response when the number of API requests
+    exceeds the predefined rate limit.
+
+    Args:
+        request (Request): The incoming HTTP request.
+        exc (RateLimitExceeded): The rate limit exceeded exception.
+
+    Returns:
+        JSONResponse: A response with a 429 status code and an error message.
+    """
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content={"error": "Перевищено ліміт запитів. Спробуйте пізніше."},
@@ -29,6 +41,18 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 @app.post("/send-email")
 async def send_in_background(background_tasks: BackgroundTasks, body: EmailSchema):
+    """Send an email asynchronously in the background.
+
+    This endpoint allows sending an email using FastAPI's background tasks.
+    The email is sent using a predefined template with a sample recipient name.
+
+    Args:
+        background_tasks (BackgroundTasks): FastAPI's background task manager.
+        body (EmailSchema): The email address to send the email to.
+
+    Returns:
+        dict: A confirmation message that the email has been sent.
+    """
     message = MessageSchema(
         subject="Fastapi mail module",
         recipients=[body.email],

@@ -9,6 +9,20 @@ router = APIRouter(tags=["utils"])
 
 @router.get("/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_db)):
+    """Check database connectivity and server health.
+
+    This endpoint performs a simple database connectivity test by executing a minimal query.
+    It helps verify that the database is properly configured and accessible.
+
+    Args:
+        db (AsyncSession): An asynchronous database session dependency.
+
+    Returns:
+        dict: A welcome message if the database connection is successful.
+
+    Raises:
+        HTTPException: With status code 500 if there are database configuration or connection issues.
+    """
     try:
         result = await db.execute(text("SELECT 1"))
         result = result.scalar_one_or_none()

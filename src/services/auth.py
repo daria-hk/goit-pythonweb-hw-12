@@ -13,12 +13,37 @@ from src.services.users import UserService
 
 
 class Hash:
+    """A utility class for password hashing and verification using bcrypt.
+
+    This class provides methods to securely hash passwords and verify 
+    plain text passwords against their hashed counterparts.
+
+    Attributes:
+        pwd_context (CryptContext): A password hashing context using bcrypt scheme.
+    """
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def verify_password(self, plain_password, hashed_password):
+        """Verify if a plain text password matches a hashed password.
+
+        Args:
+            plain_password (str): The plain text password to verify.
+            hashed_password (str): The hashed password to compare against.
+
+        Returns:
+            bool: True if the password is correct, False otherwise.
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
+        """Generate a secure hash for a given password.
+
+        Args:
+            password (str): The plain text password to hash.
+
+        Returns:
+            str: A securely hashed version of the password.
+        """
         return self.pwd_context.hash(password)
 
 
@@ -27,6 +52,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # define a function to generate a new access token
 async def create_access_token(data: dict, expires_delta: Optional[int] = None):
+    """Create a JSON Web Token (JWT) access token.
+
+    This function generates a JWT with an optional custom expiration time. 
+    If no expiration time is provided, it uses the default expiration 
+    from the configuration.
+
+    Args:
+        data (dict): The payload data to encode in the token.
+        expires_delta (Optional[int], optional): Custom expiration time in seconds. 
+            Defaults to None, which uses the default JWT expiration.
+
+    Returns:
+        str: An encoded JWT access token.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
@@ -42,6 +81,22 @@ async def create_access_token(data: dict, expires_delta: Optional[int] = None):
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ):
+    """Retrieve the current authenticated user from a JWT token.
+
+    This function validates the JWT token, extracts the username, 
+    and fetches the corresponding user from the database.
+
+    Args:
+        token (str, optional): JWT access token from the Authorization header. 
+            Defaults to Depends(oauth2_scheme).
+        db (Session, optional): Database session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: If credentials cannot be validated or user is not found.
+
+    Returns:
+        User: The authenticated user object.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -66,6 +121,17 @@ async def get_current_user(
 
 
 def create_email_token(data: dict):
+    """Create a JWT token for email verification purposes.
+
+    This function generates a JWT token with a 7-day expiration, 
+    which can be used for email-related operations like verification.
+
+    Args:
+        data (dict): The payload data to encode in the token.
+
+    Returns:
+        str: An encoded JWT token for email verification.
+    """
     to_encode = data.copy()
     expire = datetime.now(UTC) + timedelta(days=7)
     to_encode.update({"iat": datetime.now(UTC), "exp": expire})
@@ -74,6 +140,21 @@ def create_email_token(data: dict):
 
 
 async def get_email_from_token(token: str):
+    """Extract the email from a JWT token.
+
+    This function decodes a JWT token and retrieves the email 
+    (stored in the 'sub' claim). It raises an HTTPException 
+    if the token is invalid.
+
+    Args:
+        token (str): The JWT token to decode.
+
+    Raises:
+        HTTPException: If the token is invalid or cannot be decoded.
+
+    Returns:
+        str: The email extracted from the token.
+    """
     try:
         payload = jwt.decode(
             token, config.JWT_SECRET, algorithms=[config.JWT_ALGORITHM]
